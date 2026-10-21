@@ -4,8 +4,8 @@ usage: deliver.py DELIVERY_DIR WORKSPACE   (run from the repository root)
 
 Patch outputs (Git diffs the factory exported, such as changes.diff) are
 applied to this checkout with `git apply`; no fuzz, so a patch that does not
-apply to main fails here. Other outputs (plan.md, review.md, ...) are written
-at their paths. The receipt is copied to WORKSPACE/.apm/.../receipt. Nothing
+apply to main fails here. The reports (plan.md, review.md, ...) stay in the
+receipt. A delivery without patches commits its outputs at their paths. The receipt is copied to WORKSPACE/.apm/.../receipt. Nothing
 else changes; `apmx audit` in the pull request checks exactly that.
 """
 
@@ -30,15 +30,21 @@ def main(delivery: Path, workspace: str) -> None:
                 if name.startswith(prefix):
                     outputs[name[len(prefix) :]] = (receipt / name).read_bytes()
     target = Path.cwd() / PurePosixPath(workspace)
+    patches = {
+        name: data
+        for name, data in outputs.items()
+        if name.endswith(".diff") and data.startswith(b"diff --git ")
+    }
     applied, written = [], []
-    for name, data in sorted(outputs.items()):
-        if name.endswith(".diff") and data.startswith(b"diff --git "):
-            args = ["git", "apply", "--index", "--verbose"]
-            if workspace not in ("", "."):
-                args.append(f"--directory={PurePosixPath(workspace).as_posix()}")
-            subprocess.run([*args, "-"], input=data, check=True)
-            applied.append(name)
-        else:
+    for name, data in sorted(patches.items()):
+        args = ["git", "apply", "--index", "--verbose"]
+        if workspace not in ("", "."):
+            args.append(f"--directory={PurePosixPath(workspace).as_posix()}")
+        subprocess.run([*args, "-"], input=data, check=True)
+        applied.append(name)
+    if not patches:
+        # No code change to apply: the outputs themselves are the delivery.
+        for name, data in sorted(outputs.items()):
             path = target / name
             path.parent.mkdir(parents=True, exist_ok=True)
             path.write_bytes(data)
@@ -65,7 +71,7 @@ def main(delivery: Path, workspace: str) -> None:
         f" (index.json `sha256:{env.get('RECEIPT', '') or 'unsigned'}`)",
         f"- Attestation: {env.get('ATTESTATION', '') or 'none'}",
         f"- Patches applied: {', '.join(applied) or 'none'}",
-        f"- Outputs written: {', '.join(written) or 'none'}",
+        f"- Outputs committed: {', '.join(written) or 'none (reports stay in the receipt)'}",
     ]
     if mode != "live":
         lines += [
