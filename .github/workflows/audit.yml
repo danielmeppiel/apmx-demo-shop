@@ -4,8 +4,7 @@ name: apmx audit
 # re-reading its diff. `apmx audit` finds the receipt the PR adds, binds the
 # PR's change to that receipt, reads apm-policy.yml from the PR *base*, and
 # verifies the receipt's GitHub artifact attestation. Exit 0 is the pass.
-on:
-  pull_request:
+on: pull_request
 
 permissions:
   contents: read
@@ -14,26 +13,17 @@ permissions:
 jobs:
   audit:
     runs-on: ubuntu-24.04
-    timeout-minutes: 15
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
-          path: shop
-          fetch-depth: 0
+          fetch-depth: 0   # base and head commits, to bind the PR's change
           persist-credentials: false
-      # Pre-release: apmx from a pinned source commit. After v0.6.0 this is
-      # danielmeppiel/apmx/.github/actions/setup@v0.6.0 (verified native archive).
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      # Native apmx release, installed only if its SHA-256 matches the release's
+      # .sha256 file, its manifest and this pinned digest (linux-x86_64).
+      - uses: danielmeppiel/apmx/.github/actions/setup@v0.6.0
         with:
-          repository: danielmeppiel/apmx
-          ref: f76f31fe00fd53cf2a5f15320ba4d12f55ba8495
-          path: apmx
-          persist-credentials: false
-      - uses: ./apmx/.github/actions/setup-from-source
-        with:
-          path: apmx
-      - name: apmx audit
-        working-directory: shop
+          version: "0.6.0"
+          sha256: e17596b9df5ef7eb85f790a54356af4d0784258f5d39c3d2b3f37a65e3732edc
+      - run: apmx audit
         env:
           GH_TOKEN: ${{ github.token }}   # gh attestation verify, for the Identity row
-        run: apmx audit
