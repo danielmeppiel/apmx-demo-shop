@@ -1,0 +1,116 @@
+name: factory
+
+# Run the reviewed checkout factory against this repository and propose its
+# signed delivery as a pull request. apmx's reusable run.yml keeps the agent
+# away from the checks of record and from the signing identity:
+#   produce  the agent runs the factory package (only job that sees the model token)
+#   check    a fresh runner reruns the factory's own checks on the output bytes
+#   attest   OIDC signs the receipt (GitHub artifact attestation, stored here)
+# The deliver job then applies the delivered patches to main, adds the
+# receipt, and opens the pull request that audit.yml gates.
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: live runs the real factory with a model; hermetic-rehearsal runs apmx's protocol fixture (no model).
+        type: choice
+        options: [live, hermetic-rehearsal]
+        default: live
+      model:
+        description: Copilot model (empty for Copilot's default).
+        type: string
+        default: ""
+
+permissions: {}
+
+jobs:
+  preflight:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions: {}
+    steps:
+      - name: Live inference needs the COPILOT_GITHUB_TOKEN secret
+        if: inputs.mode == 'live'
+        env:
+          HAS_TOKEN: ${{ secrets.COPILOT_GITHUB_TOKEN != '' }}
+        run: |
+          if [ "$HAS_TOKEN" != "true" ]; then
+            echo "::error title=Missing COPILOT_GITHUB_TOKEN::Live mode runs Copilot CLI in Actions and needs a fine-grained personal access token with the 'Copilot Requests' account permission. Set it with: gh secret set COPILOT_GITHUB_TOKEN --repo ${GITHUB_REPOSITORY}. Or run mode=hermetic-rehearsal (no model)."
+            exit 1
+          fi
+          echo "COPILOT_GITHUB_TOKEN is set (value not shown)."
+
+  factory:
+    needs: preflight
+    uses: danielmeppiel/apmx/.github/workflows/run.yml@0a8e05117139305f8c6a7ef42ce0834839a58dab
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
+    with:
+      factory: ${{ inputs.mode == 'live' && 'danielmeppiel/apmx-demo-factory#v1.0.0' || 'danielmeppiel/apmx/tests/fixtures/run-workflow-package#0a8e05117139305f8c6a7ef42ce0834839a58dab' }}
+      workspace: ${{ inputs.mode == 'live' && '.' || 'rehearsal' }}
+      checks-requirements: checks/requirements.txt
+      model: ${{ inputs.model }}
+      apmx-version: source
+      apmx-ref: 0a8e05117139305f8c6a7ef42ce0834839a58dab
+      hermetic-actor: ${{ inputs.mode != 'live' }}
+    secrets:
+      agent-token: ${{ secrets.COPILOT_GITHUB_TOKEN }}
+
+  deliver:
+    needs: factory
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: write        # push the delivery branch (never main: branch protection)
+      pull-requests: write
+    env:
+      MODE: ${{ inputs.mode }}
+      WORKSPACE: ${{ inputs.mode == 'live' && '.' || 'rehearsal' }}
+      DEFINITION: ${{ needs.factory.outputs.definition-sha256 }}
+      RECEIPT: ${{ needs.factory.outputs.receipt-sha256 }}
+      ATTESTATION: ${{ needs.factory.outputs.attestation-url }}
+      RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          path: shop
+          fetch-depth: 0
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: apmx-delivery
+          path: delivery
+      - name: Apply the delivered patches and add the receipt
+        working-directory: shop
+        run: python3 .github/deliver.py "$GITHUB_WORKSPACE/delivery" "$WORKSPACE"
+      - name: Push the delivery branch and open the pull request
+        working-directory: shop
+        env:
+          GH_TOKEN: ${{ secrets.DELIVERY_PR_TOKEN || github.token }}
+          OWN_PR_TOKEN: ${{ secrets.DELIVERY_PR_TOKEN != '' }}
+        run: |
+          branch="factory/${MODE}-${GITHUB_RUN_ID}"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git switch -c "$branch"
+          git add -A
+          git commit -q -F "$RUNNER_TEMP/commit.txt"
+          git push -q origin "$branch"
+          if [ "$OWN_PR_TOKEN" = "true" ]; then
+            gh pr create --base main --head "$branch" --title "$(head -1 "$RUNNER_TEMP/commit.txt")" --body-file "$RUNNER_TEMP/pr.md"
+          else
+            {
+              echo "### Delivery branch pushed: \`$branch\`"
+              echo
+              echo "GitHub does not start workflows for pull requests opened with the job's own"
+              echo "GITHUB_TOKEN, so the audit gate would never run. Open the pull request yourself:"
+              echo
+              echo '```sh'
+              echo "gh pr create --repo $GITHUB_REPOSITORY --base main --head $branch --fill"
+              echo '```'
+              echo
+              echo "Or set a DELIVERY_PR_TOKEN secret to let this job open it."
+            } >> "$GITHUB_STEP_SUMMARY"
+          fi
+          cat "$RUNNER_TEMP/pr.md" >> "$GITHUB_STEP_SUMMARY"

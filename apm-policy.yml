@@ -1,0 +1,13 @@
+# APM policy for this repository. APM keeps its own keys; apmx reads only
+# `factories`, from the pull request's BASE commit, so a PR cannot loosen it.
+factories:
+  # Definition digests of the factories we reviewed (the audit's Factory row shows them).
+  allow: []
+  require_signed: true
+  signers:
+    # Receipts must carry a GitHub artifact attestation from apmx's reusable
+    # run.yml, running in this repository (where the attestation is stored).
+    - workflow: danielmeppiel/apmx/.github/workflows/run.yml
+      repo: danielmeppiel/apmx-demo-shop
+  revoked: []
+  enforcement: block

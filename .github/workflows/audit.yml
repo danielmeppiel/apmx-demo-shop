@@ -1,0 +1,39 @@
+name: apmx audit
+
+# The only gate on main: accept a factory pull request by proof, not by
+# re-reading its diff. `apmx audit` finds the receipt the PR adds, binds the
+# PR's change to that receipt, reads apm-policy.yml from the PR *base*, and
+# verifies the receipt's GitHub artifact attestation. Exit 0 is the pass.
+on:
+  pull_request:
+
+permissions:
+  contents: read
+  attestations: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          path: shop
+          fetch-depth: 0
+          persist-credentials: false
+      # Pre-release: apmx from a pinned source commit. After v0.6.0 this is
+      # danielmeppiel/apmx/.github/actions/setup@v0.6.0 (verified native archive).
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          repository: danielmeppiel/apmx
+          ref: 0a8e05117139305f8c6a7ef42ce0834839a58dab
+          path: apmx
+          persist-credentials: false
+      - uses: ./apmx/.github/actions/setup-from-source
+        with:
+          path: apmx
+      - name: apmx audit
+        working-directory: shop
+        env:
+          GH_TOKEN: ${{ github.token }}   # gh attestation verify, for the Identity row
+        run: apmx audit
