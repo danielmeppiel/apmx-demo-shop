@@ -6,7 +6,7 @@ factories:
     # The checkout factory package, as run.yml resolves it (repository, commit and content):
     - "danielmeppiel/apmx-demo-factory#v1.0.0@sha256:0bec0549b9af1e093c5204610163203ca6a58ea7602ad1021cdd381c042b039e"
     # Hermetic rehearsal only: apmx's run.yml protocol fixture package (no model).
-    - "danielmeppiel/apmx/tests/fixtures/run-workflow-package@sha256:c8895a58a771922480c71db6c310763d5fc84df6e2df68249706484ad05eaae3"
+    - "danielmeppiel/apmx/tests/fixtures/run-workflow-package@sha256:7fb53408635919338bbb63203faf05b6d73c785de006abbb3e889b5687e7e723"
   require_signed: true
   signers:
     # Receipts must carry a GitHub artifact attestation from apmx's reusable
