@@ -42,18 +42,18 @@ jobs:
 
   factory:
     needs: preflight
-    uses: danielmeppiel/apmx/.github/workflows/run.yml@0a8e05117139305f8c6a7ef42ce0834839a58dab
+    uses: danielmeppiel/apmx/.github/workflows/run.yml@f76f31fe00fd53cf2a5f15320ba4d12f55ba8495
     permissions:
       contents: read
       id-token: write
       attestations: write
     with:
-      factory: ${{ inputs.mode == 'live' && 'danielmeppiel/apmx-demo-factory#v1.0.0' || 'danielmeppiel/apmx/tests/fixtures/run-workflow-package#0a8e05117139305f8c6a7ef42ce0834839a58dab' }}
+      factory: ${{ inputs.mode == 'live' && 'danielmeppiel/apmx-demo-factory#v1.0.0' || 'danielmeppiel/apmx/tests/fixtures/run-workflow-package#f76f31fe00fd53cf2a5f15320ba4d12f55ba8495' }}
       workspace: ${{ inputs.mode == 'live' && '.' || 'rehearsal' }}
       checks-requirements: checks/requirements.txt
       model: ${{ inputs.model }}
       apmx-version: source
-      apmx-ref: 0a8e05117139305f8c6a7ef42ce0834839a58dab
+      apmx-ref: f76f31fe00fd53cf2a5f15320ba4d12f55ba8495
       hermetic-actor: ${{ inputs.mode != 'live' }}
     secrets:
       agent-token: ${{ secrets.COPILOT_GITHUB_TOKEN }}

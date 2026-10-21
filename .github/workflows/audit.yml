@@ -26,7 +26,7 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           repository: danielmeppiel/apmx
-          ref: 0a8e05117139305f8c6a7ef42ce0834839a58dab
+          ref: f76f31fe00fd53cf2a5f15320ba4d12f55ba8495
           path: apmx
           persist-credentials: false
       - uses: ./apmx/.github/actions/setup-from-source

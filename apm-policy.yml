@@ -12,7 +12,7 @@ factories:
     # Receipts must carry a GitHub artifact attestation from apmx's reusable
     # run.yml, running in this repository (where the attestation is stored).
     # Pinned to the run.yml commit factory.yml calls (pre-release; v0.6.0 pins refs/tags/v0.6.0).
-    - workflow: danielmeppiel/apmx/.github/workflows/run.yml@0a8e05117139305f8c6a7ef42ce0834839a58dab
+    - workflow: danielmeppiel/apmx/.github/workflows/run.yml@f76f31fe00fd53cf2a5f15320ba4d12f55ba8495
       repo: danielmeppiel/apmx-demo-shop
   revoked: []
   enforcement: block
