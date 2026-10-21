@@ -1,6 +1,6 @@
 """Delivery pricing in integer cents."""
 
-DELIVERY_FEE_CENTS = 500
+DELIVERY_FEE_CENTS = 0  # "small" ride-along edit outside the factory
 
 
 def delivery_fee(subtotal_cents: int) -> int:
