@@ -1,0 +1,15 @@
+name: apmx-6qpfdqw3
+version: 1.0.0
+description: APM project for apmx-6qpfdqw3
+author: Developer
+# Which agent platforms to deploy to.
+# Resolution order: --target flag > this field > auto-detect from filesystem.
+# Accepted values: agent-skills, antigravity, claude, codex, copilot, cursor, gemini, grok-build, hermes, kiro, opencode, vscode, windsurf
+targets:
+  - agent-skills
+dependencies:
+  apm:
+    - danielmeppiel/apmx/tests/fixtures/run-workflow-package#f76f31fe00fd53cf2a5f15320ba4d12f55ba8495
+  mcp: []
+includes: auto
+scripts: {}

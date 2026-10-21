@@ -1,0 +1,23 @@
+{
+  "bomFormat": "CycloneDX",
+  "components": [
+    {
+      "bom-ref": "pkg:generic/apmx@f76f31fe00fd53cf2a5f15320ba4d12f55ba8495",
+      "name": "danielmeppiel/apmx",
+      "purl": "pkg:generic/apmx@f76f31fe00fd53cf2a5f15320ba4d12f55ba8495",
+      "type": "library",
+      "version": "1.0.0"
+    }
+  ],
+  "metadata": {
+    "timestamp": "1970-01-01T00:00:00+00:00",
+    "tools": [
+      {
+        "name": "apm lock export",
+        "vendor": "APM"
+      }
+    ]
+  },
+  "specVersion": "1.5",
+  "version": 1
+}
