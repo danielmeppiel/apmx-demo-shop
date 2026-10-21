@@ -1,0 +1,15 @@
+name: apmx-vnvy3ehc
+version: 1.0.0
+description: APM project for apmx-vnvy3ehc
+author: Developer
+# Which agent platforms to deploy to.
+# Resolution order: --target flag > this field > auto-detect from filesystem.
+# Accepted values: agent-skills, antigravity, claude, codex, copilot, cursor, gemini, grok-build, hermes, kiro, opencode, vscode, windsurf
+targets:
+  - agent-skills
+dependencies:
+  apm:
+    - danielmeppiel/apmx/tests/fixtures/run-workflow-package#0a8e05117139305f8c6a7ef42ce0834839a58dab
+  mcp: []
+includes: auto
+scripts: {}

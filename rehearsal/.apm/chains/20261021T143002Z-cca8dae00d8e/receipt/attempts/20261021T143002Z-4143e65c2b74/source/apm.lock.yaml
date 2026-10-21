@@ -1,0 +1,14 @@
+lockfile_version: '1'
+apm_version: 0.33.0
+dependencies:
+- repo_url: danielmeppiel/apmx
+  name: run-workflow-package
+  host: github.com
+  resolved_commit: 0a8e05117139305f8c6a7ef42ce0834839a58dab
+  resolved_ref: 0a8e05117139305f8c6a7ef42ce0834839a58dab
+  version: 1.0.0
+  virtual_path: tests/fixtures/run-workflow-package
+  is_virtual: true
+  package_type: apm_package
+  content_hash: sha256:0f716a14839fb659bf0eecbb8a2120a06f7a46498dfb4094a9e2e7841932fee2
+deployments: []
