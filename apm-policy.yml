@@ -1,13 +1,18 @@
 # APM policy for this repository. APM keeps its own keys; apmx reads only
 # `factories`, from the pull request's BASE commit, so a PR cannot loosen it.
 factories:
-  # Definition digests of the factories we reviewed (the audit's Factory row shows them).
-  allow: []
+  allow:
+    # Definition digests of the factories we reviewed (the audit's Factory row shows them).
+    # The checkout factory package, as run.yml resolves it (repository, commit and content):
+    - "danielmeppiel/apmx-demo-factory#v1.0.0@sha256:0bec0549b9af1e093c5204610163203ca6a58ea7602ad1021cdd381c042b039e"
+    # Hermetic rehearsal only: apmx's run.yml protocol fixture package (no model).
+    - "danielmeppiel/apmx/tests/fixtures/run-workflow-package@sha256:c8895a58a771922480c71db6c310763d5fc84df6e2df68249706484ad05eaae3"
   require_signed: true
   signers:
     # Receipts must carry a GitHub artifact attestation from apmx's reusable
     # run.yml, running in this repository (where the attestation is stored).
-    - workflow: danielmeppiel/apmx/.github/workflows/run.yml
+    # Pinned to the run.yml commit factory.yml calls (pre-release; v0.6.0 pins refs/tags/v0.6.0).
+    - workflow: danielmeppiel/apmx/.github/workflows/run.yml@0a8e05117139305f8c6a7ef42ce0834839a58dab
       repo: danielmeppiel/apmx-demo-shop
   revoked: []
   enforcement: block
