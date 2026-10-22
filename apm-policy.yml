@@ -5,8 +5,8 @@ factories:
     # Definition digests of the factories we reviewed (the audit's Factory row shows them).
     # The checkout factory package, as run.yml resolves it (repository, commit and content):
     - "danielmeppiel/apmx-demo-factory#v1.0.0@sha256:0bec0549b9af1e093c5204610163203ca6a58ea7602ad1021cdd381c042b039e"
-    # Hermetic rehearsal only: apmx's run.yml protocol fixture package at v0.7.0 (no model).
-    - "danielmeppiel/apmx/tests/fixtures/run-workflow-package@sha256:9da1c7e596cdc1c677282a2ccbad1de39a9d8a4a9a4189547a5173e7b7b29e0d"
+    # Hermetic rehearsal only: apmx's run.yml protocol fixture package at v0.7.1 (no model).
+    - "danielmeppiel/apmx/tests/fixtures/run-workflow-package@sha256:c011c35b5790bc327355f427b73b56192e37b9e096d95bbf5dd9e6117480d05b"
   require_signed: true
   signers:
     # Every changed file must be covered by a signed verification summary from
