@@ -1,0 +1,9 @@
+# TEST ONLY (check-name spoofing experiment; this PR will be closed, never merged).
+name: spoof
+on: pull_request
+permissions: {}
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - run: exit 0

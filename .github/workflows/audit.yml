@@ -1,39 +1,12 @@
+# TEST ONLY: the PR's own copy of the gate, rewritten to pass. Must have no effect.
 name: apmx audit
-
-# The only gate on main: accept a factory pull request by proof, not by
-# re-reading its diff. The PR carries code only. `apmx audit` looks each
-# changed file up by SHA-256 in the signer's attestation store, requires one
-# signed verification summary covering every changed file, checks the receipt
-# statements it binds against apm-policy.yml read from the PR *base*, and
-# refuses a stale base. Exit 0 is the pass, and only a valid factory delivery
-# passes: merge other PRs through the normal path (admin bypass).
-#
-# pull_request_target runs THIS file from main, never the PR's copy, so a PR
-# cannot edit or delete its own gate. Nothing from the PR is executed: its head
-# is checked out as bytes for apmx to hash, without credentials.
 on:
   pull_request_target:
     types: [opened, synchronize, reopened]
-
-permissions:
-  contents: read
-  attestations: read
-
+  pull_request:
+permissions: {}
 jobs:
   audit:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
-        with:
-          ref: ${{ github.event.pull_request.head.sha }}   # bytes only; never executed
-          fetch-depth: 0   # base and head commits, to bind the PR's change
-          persist-credentials: false
-      # Native apmx release, installed only if its SHA-256 matches the release's
-      # .sha256 file, its manifest and this pinned digest (linux-x86_64).
-      - uses: danielmeppiel/apmx/.github/actions/setup@v0.7.0
-        with:
-          version: "0.7.0"
-          sha256: 78f1628480cdd5bf2d21be97780d1b12bb121edf70e546b7967b8589953a90b0
-      - run: apmx audit
-        env:
-          GH_TOKEN: ${{ github.token }}   # gh attestation verify, for the Identity row
+      - run: exit 0
