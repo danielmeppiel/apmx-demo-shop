@@ -12,10 +12,10 @@ factories:
     # Every changed file must be covered by a signed verification summary from
     # apmx's reusable run.yml, running in this repository (where the
     # attestations are stored). Pinned to the run.yml release factory.yml calls:
-    # the tag, and the commit it must resolve to (`git rev-parse v0.7.0^{commit}`),
+    # the tag, and the commit it must resolve to (`git rev-parse v0.7.1^{commit}`),
     # because a tag can move and this SHA cannot. Re-pin both on upgrade.
-    - workflow: danielmeppiel/apmx/.github/workflows/run.yml@refs/tags/v0.7.0
-      workflow_sha: "315491bff45f653e728c91c7ad1fc07465b97535"
+    - workflow: danielmeppiel/apmx/.github/workflows/run.yml@refs/tags/v0.7.1
+      workflow_sha: "a70c1939dddc6f5d7888b76fd5bb8bab3e69e886"
       repo: danielmeppiel/apmx-demo-shop
   revoked: []
   enforcement: block

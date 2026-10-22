@@ -60,18 +60,18 @@ jobs:
 
   factory:
     needs: preflight
-    uses: danielmeppiel/apmx/.github/workflows/run.yml@v0.7.0
+    uses: danielmeppiel/apmx/.github/workflows/run.yml@v0.7.1
     permissions:
       contents: read
       id-token: write
       attestations: write
     with:
-      factory: ${{ inputs.mode == 'live' && 'danielmeppiel/apmx-demo-factory#v1.0.0' || 'danielmeppiel/apmx/tests/fixtures/run-workflow-package#v0.7.0' }}
+      factory: ${{ inputs.mode == 'live' && 'danielmeppiel/apmx-demo-factory#v1.0.0' || 'danielmeppiel/apmx/tests/fixtures/run-workflow-package#v0.7.1' }}
       workspace: ${{ inputs.mode == 'live' && '.' || 'rehearsal' }}
       checks-requirements: checks/requirements.txt
       model: ${{ inputs.model }}
-      apmx-version: "0.7.0"
-      apmx-ref: v0.7.0
+      apmx-version: "0.7.1"
+      apmx-ref: v0.7.1
       hermetic-actor: ${{ inputs.mode != 'live' }}
       # This repository is both the platform and the target, so run.yml's
       # deliver job builds the pull request commit (code only, no receipt).

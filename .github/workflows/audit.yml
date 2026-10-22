@@ -30,10 +30,10 @@ jobs:
           persist-credentials: false
       # Native apmx release, installed only if its SHA-256 matches the release's
       # .sha256 file, its manifest and this pinned digest (linux-x86_64).
-      - uses: danielmeppiel/apmx/.github/actions/setup@v0.7.0
+      - uses: danielmeppiel/apmx/.github/actions/setup@v0.7.1
         with:
-          version: "0.7.0"
-          sha256: 78f1628480cdd5bf2d21be97780d1b12bb121edf70e546b7967b8589953a90b0
+          version: "0.7.1"
+          sha256: 222fd72b969191493c5c437ffc1f9542e93ca98bd04a806ede7e8138680129e9
       - run: apmx audit
         env:
           GH_TOKEN: ${{ github.token }}   # gh attestation verify, for the Identity row
