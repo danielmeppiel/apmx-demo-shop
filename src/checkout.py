@@ -11,3 +11,8 @@ def checkout(subtotal_cents: int) -> dict[str, int]:
         "delivery_cents": fee,
         "total_cents": subtotal_cents + DELIVERY_FEE_CENTS,
     }
+
+
+def apply_coupon(total_cents: int) -> int:
+    """Unreviewed edit: not part of the factory delivery."""
+    return total_cents - 500
