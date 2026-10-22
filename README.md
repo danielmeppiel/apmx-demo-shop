@@ -13,24 +13,28 @@ gate on `main` is [`apmx audit`](https://github.com/danielmeppiel/apmx/blob/main
    [`factory.yml`](.github/workflows/factory.yml) calls apmx's reusable
    [`run.yml`](https://github.com/danielmeppiel/apmx/blob/main/.github/workflows/run.yml).
    The agent runs in one job. A fresh job with no agent reruns the checks and
-   writes the receipt of record. A third job signs that receipt with GitHub's
-   OIDC identity. The workflow then opens a pull request with the change and
-   the receipt.
+   writes the receipt of record (one `receipt.intoto.jsonl` bundle). A third
+   job signs, with GitHub's OIDC identity, a verification summary over the
+   delivered files and the receipt bundle beside it. run.yml's deliver job
+   then commits **only the delivered files** onto `main`: the pull request
+   carries code, never a receipt.
 3. **This repository accepts the PR by proof.**
    [`apm-policy.yml`](apm-policy.yml) pins the approved factory digest and the
    only workflow allowed to sign. [`audit.yml`](.github/workflows/audit.yml)
-   runs `apmx audit`, a required check on `main`. The PR passes only if:
-   - its change is exactly what the receipt binds;
+   runs `apmx audit`, a required check on `main`. It looks every changed file
+   up by SHA-256 in this repository's attestation store. The PR passes only if:
+   - every changed file is covered by one signed verification summary;
+   - that signature comes from that workflow, at the pinned commit;
    - the factory is the approved one and its checks passed;
    - its ingredients audit clean;
-   - the signature comes from that workflow.
+   - it is built on the base the factory read (no stale base).
 
    Anything else is exit 1.
 
 ```text
 [+] Factory       definition sha256:... on factories.allow
-[+] Outputs       PR #N: ... bound
-[+] Identity      signed by danielmeppiel/apmx/.github/workflows/run.yml@...
+[+] Outputs       PR #N: 1 changed file = delivered files at head ...; before-images match base ...
+[+] Identity      signed by danielmeppiel/apmx/.github/workflows/run.yml@refs/tags/v0.7.0 at 315491bff45f (tag object 86978e639fcf)
 [+] VALID   (authenticated: danielmeppiel/apmx/.github/workflows/run.yml)
 ```
 
@@ -45,7 +49,7 @@ the same delivery plus one unrelated edit (red, exit 1).
 | `request.md` | The feature request the factory implements: free delivery from 5000 cents. |
 | `apm-policy.yml` | APM policy. apmx reads only its `factories` section. |
 | `.github/workflows/audit.yml` | The gate: `apmx audit` on every pull request. |
-| `.github/workflows/factory.yml` | Runs the factory (`live`, or `hermetic-rehearsal` with no model) and proposes its delivery. |
+| `.github/workflows/factory.yml` | Runs the factory (`live`, or `hermetic-rehearsal` with no model) through apmx's `run.yml`, whose deliver job builds the code-only commit. |
 | `rehearsal/` | Input for the hermetic rehearsal: apmx's protocol fixture copies `notes.md` to `handoff.json`. |
 
 ## Run the factory
@@ -62,10 +66,15 @@ the same delivery plus one unrelated edit (red, exit 1).
 gh workflow run factory.yml --repo danielmeppiel/apmx-demo-shop -f mode=live
 ```
 
-GitHub does not start workflows for pull requests opened with a job's own
-`GITHUB_TOKEN`. So the workflow pushes a `factory/...` branch and prints the
-`gh pr create` command, unless a `DELIVERY_PR_TOKEN` secret is set. That would
-be a token limited to this repository with Contents and Pull requests write.
+This repository is both the factory platform and the target: `factory.yml`
+calls `run.yml` with `target-repository` set to itself. With a
+`DELIVERY_PR_TOKEN` secret (a token limited to this repository with Contents
+and Pull requests write), run.yml's deliver job pushes `apmx/<mode>-<run id>`
+and opens the pull request itself (`deliver: pull-request`). Without it,
+run.yml builds the delivered commit (`deliver: bundle`) and a short `publish`
+job pushes the branch and prints the `gh pr create` command: GitHub rebinds a
+passed `GITHUB_TOKEN` to each called job's own read-only token, and pull
+requests opened with `GITHUB_TOKEN` never start `audit.yml`.
 
 ## Limits
 

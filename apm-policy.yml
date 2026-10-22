@@ -5,14 +5,17 @@ factories:
     # Definition digests of the factories we reviewed (the audit's Factory row shows them).
     # The checkout factory package, as run.yml resolves it (repository, commit and content):
     - "danielmeppiel/apmx-demo-factory#v1.0.0@sha256:0bec0549b9af1e093c5204610163203ca6a58ea7602ad1021cdd381c042b039e"
-    # Hermetic rehearsal only: apmx's run.yml protocol fixture package (no model).
-    - "danielmeppiel/apmx/tests/fixtures/run-workflow-package@sha256:9206aae634f8197d95f30dc360723801a7c05a16c1aa0e7e7d87cfc20809c5a2"
+    # Hermetic rehearsal only: apmx's run.yml protocol fixture package at v0.7.0 (no model).
+    - "danielmeppiel/apmx/tests/fixtures/run-workflow-package@sha256:9da1c7e596cdc1c677282a2ccbad1de39a9d8a4a9a4189547a5173e7b7b29e0d"
   require_signed: true
   signers:
-    # Receipts must carry a GitHub artifact attestation from apmx's reusable
-    # run.yml, running in this repository (where the attestation is stored).
-    # Pinned to the run.yml release factory.yml calls.
-    - workflow: danielmeppiel/apmx/.github/workflows/run.yml@refs/tags/v0.6.0
+    # Every changed file must be covered by a signed verification summary from
+    # apmx's reusable run.yml, running in this repository (where the
+    # attestations are stored). Pinned to the run.yml release factory.yml calls:
+    # the tag, and the commit it must resolve to (`git rev-parse v0.7.0^{commit}`),
+    # because a tag can move and this SHA cannot. Re-pin both on upgrade.
+    - workflow: danielmeppiel/apmx/.github/workflows/run.yml@refs/tags/v0.7.0
+      workflow_sha: "315491bff45f653e728c91c7ad1fc07465b97535"
       repo: danielmeppiel/apmx-demo-shop
   revoked: []
   enforcement: block
